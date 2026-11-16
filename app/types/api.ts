@@ -84,3 +84,24 @@ export interface DriverRegisterPayload {
   vehicleType: string
   password: string
 }
+
+export interface AdminUser {
+  id: string
+  name: string
+  email: string
+  role: Role
+  status: AccountStatus
+  contact?: string
+  plateNumber?: string
+  vehicleType?: string
+  plateVerified?: boolean
+  statusReason?: string
+}
+
+export interface AdminSummary {
+  bookings: Record<BookingStatus, number>
+  activeUsers: number
+  suspendedUsers: number
+  deactivatedUsers: number
+  pendingPlates: number
+}
