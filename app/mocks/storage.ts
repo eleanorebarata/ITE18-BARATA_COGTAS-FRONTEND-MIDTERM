@@ -10,3 +10,5 @@ export function read<T>(key: string, fallback: T): T {
 export function write(key: string, value: unknown) {
   if (typeof localStorage !== 'undefined') localStorage.setItem(key, JSON.stringify(value))
 }
+
+export const OVERRIDES_KEY = 'csu_mock_overrides'

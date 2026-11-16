@@ -6,6 +6,7 @@ import {
 } from './bookings'
 import { registerDriver, driverProfile, devVerifyPlate } from './drivers'
 import { places, fareOptions } from './places'
+import { adminSummary, adminUsers, setUserStatus, verifyDriverPlate, adminBookings } from './admin'
 
 type Query = Record<string, string>
 type Ctx = { userId: string | null }
@@ -41,6 +42,12 @@ const routes: Route[] = [
   ['POST', /^\/driver\/bookings\/([^/]+)\/accept$/, (m, _b, _q, c) => driverAccept(m[1]!, uid(c))],
   ['POST', /^\/driver\/bookings\/([^/]+)\/decline$/, (m, b, _q, c) => driverDecline(m[1]!, uid(c), b)],
   ['POST', /^\/driver\/bookings\/([^/]+)\/complete$/, (m, _b, _q, c) => driverComplete(m[1]!, uid(c))],
+
+  ['GET', /^\/admin\/summary$/, (_m, _b, _q, c) => adminSummary(uid(c))],
+  ['GET', /^\/admin\/users$/, (_m, _b, q, c) => adminUsers(uid(c), q)],
+  ['PATCH', /^\/admin\/users\/([^/]+)\/status$/, (m, b, _q, c) => setUserStatus(uid(c), m[1]!, b)],
+  ['PATCH', /^\/admin\/drivers\/([^/]+)\/plate$/, (m, b, _q, c) => verifyDriverPlate(uid(c), m[1]!, b)],
+  ['GET', /^\/admin\/bookings$/, (_m, _b, q, c) => adminBookings(uid(c), q)],
 
   // Testing helpers, mock only
   ['POST', /^\/dev\/bookings\/([^/]+)\/accept$/, (m, b) => devAccept(m[1]!, b)],

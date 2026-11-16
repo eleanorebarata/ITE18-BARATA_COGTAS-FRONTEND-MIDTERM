@@ -1,13 +1,14 @@
 import { fail } from './errors'
 import { mockUsers, type MockUser } from './users'
-import { read, write } from './storage'
+import { read, write, OVERRIDES_KEY } from './storage'
 import { normalizePlate, isValidPlate } from '~/utils/plate'
 
 const KEY = 'csu_mock_users'
 const stored = () => read<MockUser[]>(KEY, [])
 
 export function allUsers(): MockUser[] {
-  return [...mockUsers, ...stored()]
+  const overrides = read<Record<string, Partial<MockUser>>>(OVERRIDES_KEY, {})
+  return [...mockUsers, ...stored()].map(u => ({ ...u, ...overrides[u.id] }))
 }
 
 export function registerDriver(body: any) {
