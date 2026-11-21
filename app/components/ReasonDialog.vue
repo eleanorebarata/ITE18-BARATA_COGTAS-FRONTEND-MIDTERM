@@ -6,6 +6,7 @@ const props = defineProps<{
   confirmLabel: string
   busy: boolean
   error: string
+  tone?: 'danger' | 'primary'
 }>()
 const emit = defineEmits<{ confirm: [payload: { reasonCode: string; note: string }] }>()
 
@@ -62,8 +63,9 @@ function submit() {
     </template>
 
     <div style="margin-top: 24px; display: flex; gap: 8px; justify-content: flex-end">
-      <button type="button" style="min-height: 44px; padding: 0 16px" @click="close">Go back</button>
-      <button type="button" :disabled="busy" style="min-height: 44px; padding: 0 16px; background: #8a1c1c; color: #fff; border: 0; border-radius: 8px" @click="submit">
+            <button type="button" :disabled="busy"
+              :style="{ minHeight: '44px', padding: '0 16px', background: tone === 'primary' ? '#1b6b3a' : '#8a1c1c', color: '#fff', border: '0', borderRadius: '8px' }"
+              @click="submit">
         {{ busy ? 'Sending...' : confirmLabel }}
       </button>
     </div>

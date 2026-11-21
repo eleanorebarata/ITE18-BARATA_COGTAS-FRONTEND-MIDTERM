@@ -10,6 +10,7 @@ export interface MockUser {
   plateNumber?: string
   vehicleType?: string
   plateVerified?: boolean
+  statusReason?: string
 }
 
 export const mockUsers: MockUser[] = [
