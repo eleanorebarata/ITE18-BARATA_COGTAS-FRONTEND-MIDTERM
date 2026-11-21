@@ -121,6 +121,7 @@ const when = (iso: string) => new Date(iso).toLocaleString('en-PH', { dateStyle:
     <template v-else-if="profile">
       <p style="margin: 0">{{ profile.name }} &middot; {{ profile.vehicleType }} &middot; Plate <strong>{{ profile.plateNumber }}</strong></p>
       <button style="margin-top: 8px; min-height: 44px" @click="logout">Log out</button>
+      <NuxtLink to="/reports" style="margin-left: 16px">My reports</NuxtLink>
 
       <p v-if="!profile.plateVerified" role="status" style="background: #fdf3cc; padding: 12px; border-radius: 8px; margin-top: 16px">
         Your plate number is waiting for administrator verification. You cannot accept requests yet.
@@ -144,6 +145,10 @@ const when = (iso: string) => new Date(iso).toLocaleString('en-PH', { dateStyle:
           <h2 style="font-size: 18px; margin: 8px 0">{{ b.pickup }} to {{ b.destination }}</h2>
           <p style="margin: 0">{{ when(b.pickupAt) }} &middot; {{ b.passengers }} passenger(s) &middot; {{ b.transport }}</p>
           <p v-if="b.fareMin" style="margin: 4px 0 0">Fare: &#8369;{{ b.fareMin }} to &#8369;{{ b.fareMax }}</p>
+          <p v-if="b.passengerName" style="margin: 4px 0 0">Passenger: {{ b.passengerName }}</p>
+          <div v-if="tab !== 'requests' && b.driver" style="margin-top: 8px">
+            <ReportButton :booking-id="b.id" target-type="passenger" label="Report passenger" />
+          </div>
 
           <div v-if="tab === 'requests'" style="margin-top: 12px; display: flex; gap: 8px">
             <button :disabled="!profile.plateVerified || busyId === b.id"
