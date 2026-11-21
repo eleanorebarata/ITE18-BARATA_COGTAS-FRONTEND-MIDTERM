@@ -1,8 +1,8 @@
 import { fail } from './errors'
 import { places, fareOptions } from './places'
 import { cancelReasons, CANCEL_WINDOW_MINUTES, MAX_STRIKES } from '~/utils/cancelPolicy'
-import { driverProfile } from './drivers'
-import { declineReasons } from '~/utils/driverPolicy'
+import { driverProfile, allUsers } from './drivers'
+import { excuseReasons } from '~/utils/adminPolicy'
 
 const KEY = 'csu_mock_bookings'
 const STANDING_KEY = 'csu_mock_standing'
@@ -27,11 +27,13 @@ export function getStanding() {
   return read(STANDING_KEY, { strikeCount: 0, status: 'active', suspendedUntil: null as string | null })
 }
 
-export function listBookings() {
-  return load().map(b => ({ ...b, serverNow: new Date().toISOString() }))
+export function listBookings(userId: string | null = null) {
+  return load()
+    .filter(b => !userId || !b.passengerId || b.passengerId === userId)
+    .map(b => ({ ...b, serverNow: new Date().toISOString() }))
 }
 
-export function createBooking(body: any) {
+export function createBooking(body: any, userId: string | null = null) {
   const fields: Record<string, string> = {}
   const pickup = places.find(p => p.id === body?.pickupId)
   const dest = places.find(p => p.id === body?.destinationId)
@@ -62,7 +64,9 @@ export function createBooking(body: any) {
     serverNow: new Date().toISOString(),
     transport: fare.transport,
     fareMin: fare.fareMin,
-    fareMax: fare.fareMax
+    fareMax: fare.fareMax,
+    passengerId: userId,
+    passengerName: allUsers().find(u => u.id === userId)?.name.split(' ')[0] ?? 'Passenger'
   }
   save([booking, ...load()])
   return booking
@@ -109,9 +113,12 @@ export function cancelBooking(id: string, body: any) {
     throw fail(422, 'VALIDATION', 'Please explain in at least 10 characters.', { note: 'At least 10 characters' })
   }
 
-  b.status = 'Cancelled'
-  b.cancelReason = reason.code
-  save(list)
+    b.status = 'Cancelled'
+    b.cancelReason = reason.code
+    b.cancelNote = String(body?.note ?? '').trim()
+    b.cancelledAfterAccept = wasAccepted
+    b.strikeCounted = wasAccepted && reason.mayCount
+    save(list)
 
   const standing = getStanding()
   if (wasAccepted && reason.mayCount) {
@@ -203,4 +210,47 @@ export function driverComplete(id: string, userId: string | null) {
   b.status = 'Completed'
   save(list)
   return { ...b, serverNow: new Date().toISOString() }
+}
+
+// ----- Used by reviews, reports, and the admin cancellation review -----
+export const findBooking = (id: string) => load().find(b => b.id === id)
+
+export function adminCancellations() {
+  return load()
+    .filter(b => b.status === 'Cancelled' && b.cancelledAfterAccept)
+    .map(b => ({
+      id: b.id,
+      route: `${b.pickup} to ${b.destination}`,
+      passengerName: b.passengerName ?? 'Unknown',
+      reason: cancelReasons.find(r => r.code === b.cancelReason)?.label ?? b.cancelReason,
+      note: b.cancelNote ?? '',
+      pickupAt: b.pickupAt,
+      strikeCounted: !!b.strikeCounted,
+      strikeRemoved: !!b.strikeRemoved
+    }))
+}
+
+export function adminExcuse(id: string, body: any) {
+  const list = load()
+  const b = list.find(x => x.id === id)
+  if (!b || !b.strikeCounted) throw fail(409, 'NOT_COUNTED', 'There is no warning to remove for this booking.')
+
+  const reason = excuseReasons.find(r => r.code === body?.reasonCode)
+  if (!reason) throw fail(422, 'VALIDATION', 'Choose a reason.', { reasonCode: 'Choose a reason' })
+  if (reason.needsNote && String(body?.note ?? '').trim().length < 10) {
+    throw fail(422, 'VALIDATION', 'Please explain in at least 10 characters.', { note: 'At least 10 characters' })
+  }
+
+  b.strikeCounted = false
+  b.strikeRemoved = true
+  save(list)
+
+  const standing = getStanding()
+  standing.strikeCount = Math.max(0, standing.strikeCount - 1)
+  if (standing.status === 'suspended' && standing.strikeCount < MAX_STRIKES) {
+    standing.status = 'active'
+    standing.suspendedUntil = null
+  }
+  write(STANDING_KEY, standing)
+  return { id, strikeCounted: false, strikeRemoved: true }
 }
