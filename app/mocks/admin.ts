@@ -5,7 +5,7 @@ import { read, write, OVERRIDES_KEY } from './storage'
 import type { MockUser } from './users'
 import { deactivateReasons, reactivateReasons } from '~/utils/adminPolicy'
 
-function requireAdmin(userId: string | null) {
+export function requireAdmin(userId: string | null) {
   const u = allUsers().find(x => x.id === userId && x.role === 'admin')
   if (!u) throw fail(403, 'FORBIDDEN', 'Administrator account required.')
   return u
