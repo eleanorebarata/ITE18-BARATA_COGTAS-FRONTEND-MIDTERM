@@ -44,6 +44,7 @@ export interface Place {
   name: string
   lat: number
   lng: number
+  active?: boolean
 }
 
 export interface FareOption {
@@ -187,4 +188,11 @@ export interface TrackingInfo {
   pickup: (LatLng & { name: string }) | null
   driver: (LatLng & { updatedAt: string }) | null
   serverNow: string
+}
+
+export interface FareRule {
+  transport: 'Tricycle' | 'Bao-bao'
+  baseFare: number   // minimum fare in pesos
+  perKm: number      // pesos added per kilometre
+  range: number      // fareMax = fareMin + range
 }

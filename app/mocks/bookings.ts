@@ -1,5 +1,5 @@
-import { fail } from './errors'
-import { places, fareOptions } from './places'
+﻿import { fail } from './errors'
+import { activePlaces, fareOptions } from './places'
 import { cancelReasons, CANCEL_WINDOW_MINUTES, MAX_STRIKES } from '~/utils/cancelPolicy'
 import { driverProfile, allUsers } from './drivers'
 import { excuseReasons } from '~/utils/adminPolicy'
@@ -35,8 +35,8 @@ export function listBookings(userId: string | null = null) {
 
 export function createBooking(body: any, userId: string | null = null) {
   const fields: Record<string, string> = {}
-  const pickup = places.find(p => p.id === body?.pickupId)
-  const dest = places.find(p => p.id === body?.destinationId)
+    const pickup = activePlaces().find(p => p.id === body?.pickupId)
+  const dest = activePlaces().find(p => p.id === body?.destinationId)
   if (!pickup) fields.pickupId = 'Choose a pickup point'
   if (!dest) fields.destinationId = 'Choose a destination'
   if (pickup && dest && pickup.id === dest.id) fields.destinationId = 'Destination must be different from pickup'

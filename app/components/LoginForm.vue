@@ -73,6 +73,12 @@ async function submit() {
               style="margin-top: 24px; width: 100%; min-height: 44px; background: #1b6b3a; color: #fff; border: 0; border-radius: 8px">
         {{ loading ? 'Logging in...' : 'Log in' }}
       </button>
+          <p v-if="role === 'passenger'" style="margin-top: 16px">
+      No account yet? <NuxtLink to="/auth/user-register">Create one</NuxtLink>
+    </p>
+    <p v-if="role === 'driver'" style="margin-top: 16px">
+      New driver? <NuxtLink to="/auth/driver-register">Register your vehicle</NuxtLink>
+    </p>
     </form>
   </main>
 </template>

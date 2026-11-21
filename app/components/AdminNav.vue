@@ -14,6 +14,7 @@ function logout() {
     <NuxtLink to="/admin/bookings">Bookings</NuxtLink>
     <NuxtLink to="/admin/reports">Reports</NuxtLink>
     <NuxtLink to="/admin/cancellations">Cancellations</NuxtLink>
+    <NuxtLink to="/admin/transport">Routes and fares</NuxtLink>
     <span style="flex: 1" />
     <span>{{ auth.user?.name }}</span>
     <button style="min-height: 44px" @click="logout">Log out</button>
