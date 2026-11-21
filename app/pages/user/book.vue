@@ -94,7 +94,10 @@ async function confirm() {
   <main style="max-width: 640px; margin: 0 auto; padding: 16px">
     <NuxtLink to="/user/bookings">&larr; My bookings</NuxtLink>
     <h1>Book a ride</h1>
-    <p>Step {{ draft.step }} of 3</p>
+    <div class="progress" role="progressbar" aria-valuemin="1" aria-valuemax="3" :aria-valuenow="draft.step" :aria-label="`Step ${draft.step} of 3`">
+      <span :style="{ width: (draft.step / 3) * 100 + '%' }" />
+    </div>
+    <p style="margin: 0">Step {{ draft.step }} of 3</p>
 
     <p v-if="banner" role="alert" style="background: #f8e6e6; color: #8a1c1c; padding: 12px; border-radius: 8px">
       {{ banner }}

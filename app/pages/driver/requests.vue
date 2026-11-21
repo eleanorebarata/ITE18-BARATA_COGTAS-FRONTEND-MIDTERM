@@ -120,10 +120,7 @@ const when = (iso: string) => new Date(iso).toLocaleString('en-PH', { dateStyle:
 
     <template v-else-if="profile">
       <p style="margin: 0">{{ profile.name }} &middot; {{ profile.vehicleType }} &middot; Plate <strong>{{ profile.plateNumber }}</strong></p>
-      <button style="margin-top: 8px; min-height: 44px" @click="logout">Log out</button>
       <DriverLocationShare :has-active-ride="schedule.length > 0" />
-      <NuxtLink to="/reports" style="margin-left: 16px">My reports</NuxtLink>
-
       <p v-if="!profile.plateVerified" role="status" style="background: #fdf3cc; padding: 12px; border-radius: 8px; margin-top: 16px">
         Your plate number is waiting for administrator verification. You cannot accept requests yet.
       </p>
@@ -174,8 +171,8 @@ const when = (iso: string) => new Date(iso).toLocaleString('en-PH', { dateStyle:
         </li>
       </ul>
 
-      <section v-if="config.public.useMock" style="margin-top: 32px; border: 2px dashed #b58900; border-radius: 12px; padding: 16px">
-        <strong>Testing tools (mock only, removed before the Final)</strong>
+<section v-if="config.public.useMock && config.public.showDevTools" style="margin-top: 32px; border: 2px dashed #b58900; border-radius: 12px; padding: 16px">
+        <strong>Testing tools (mock only)</strong>
         <div style="margin-top: 8px">
           <button :disabled="profile.plateVerified" @click="verify">Pretend the admin verified my plate</button>
         </div>
