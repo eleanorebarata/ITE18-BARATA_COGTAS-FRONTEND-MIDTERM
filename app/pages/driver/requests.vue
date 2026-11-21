@@ -121,6 +121,7 @@ const when = (iso: string) => new Date(iso).toLocaleString('en-PH', { dateStyle:
     <template v-else-if="profile">
       <p style="margin: 0">{{ profile.name }} &middot; {{ profile.vehicleType }} &middot; Plate <strong>{{ profile.plateNumber }}</strong></p>
       <button style="margin-top: 8px; min-height: 44px" @click="logout">Log out</button>
+      <DriverLocationShare :has-active-ride="schedule.length > 0" />
       <NuxtLink to="/reports" style="margin-left: 16px">My reports</NuxtLink>
 
       <p v-if="!profile.plateVerified" role="status" style="background: #fdf3cc; padding: 12px; border-radius: 8px; margin-top: 16px">
