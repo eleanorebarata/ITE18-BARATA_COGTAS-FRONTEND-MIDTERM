@@ -72,3 +72,27 @@ export function devVerifyPlate(userId: string | null) {
   }
   return driverProfile(userId)
 }
+
+export function registerPassenger(body: any) {
+  const fields: Record<string, string> = {}
+  const name = String(body?.name ?? '').trim()
+  const email = String(body?.email ?? '').trim().toLowerCase()
+  const contact = String(body?.contact ?? '').trim()
+  const password = String(body?.password ?? '')
+
+  if (name.length < 2) fields.name = 'Enter your full name'
+  if (!/^\S+@\S+\.\S+$/.test(email)) fields.email = 'Enter a valid email'
+  if (!/^09\d{9}$/.test(contact)) fields.contact = 'Use an 11-digit number starting with 09'
+  if (password.length < 8) fields.password = 'Password must be at least 8 characters'
+  if (Object.keys(fields).length) throw fail(422, 'VALIDATION', 'Check the highlighted fields.', fields)
+
+  if (allUsers().some(u => u.email === email)) {
+    throw fail(409, 'EMAIL_TAKEN', 'This email is already registered.', { email: 'This email is already registered' })
+  }
+
+  const user: MockUser = {
+    id: `u-${Date.now()}`, name, email, password, role: 'passenger', status: 'active', contact
+  }
+  write(KEY, [...stored(), user])
+  return { message: 'Account created. You can log in now.' }
+}

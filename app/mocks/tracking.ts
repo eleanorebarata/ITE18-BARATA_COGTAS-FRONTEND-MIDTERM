@@ -1,6 +1,6 @@
 import { fail } from './errors'
 import { read, write } from './storage'
-import { places } from './places'
+import { allPlaces } from './places'
 import { driverBookings, findBooking } from './bookings'
 
 const KEY = 'csu_mock_locations'
@@ -38,7 +38,7 @@ export function getBookingTracking(userId: string, bookingId: string) {
   const serverNow = new Date().toISOString()
   if (b.status !== 'Accepted' || !b.driver) return { active: false, pickup: null, driver: null, serverNow }
 
-  const place = places.find(p => p.name === b.pickup)
+  const place = allPlaces().find(p => p.name === b.pickup)
   const loc = load()[b.driver.id]
   return {
     active: true,
@@ -54,7 +54,7 @@ export function devMoveDriver(bookingId: string) {
   if (!b || b.status !== 'Accepted' || !b.driver) {
     throw fail(409, 'NO_ACTIVE_RIDE', 'The booking must be accepted first.')
   }
-  const pickup = places.find(p => p.name === b.pickup)
+  const pickup = allPlaces().find(p => p.name === b.pickup)
   if (!pickup) throw fail(404, 'NOT_FOUND', 'Pickup point not found.')
 
   const all = load()
