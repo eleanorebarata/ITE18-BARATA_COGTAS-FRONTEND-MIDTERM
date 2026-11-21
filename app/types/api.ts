@@ -176,3 +176,15 @@ export interface AdminCancellation {
   strikeCounted: boolean
   strikeRemoved: boolean
 }
+
+export interface LatLng {
+  lat: number
+  lng: number
+}
+
+export interface TrackingInfo {
+  active: boolean
+  pickup: (LatLng & { name: string }) | null
+  driver: (LatLng & { updatedAt: string }) | null
+  serverNow: string
+}
