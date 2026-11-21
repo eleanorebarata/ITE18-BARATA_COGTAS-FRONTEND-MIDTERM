@@ -1,6 +1,5 @@
 import { fail } from './errors'
 import { allUsers } from './drivers'
-import { mockUsers } from './users'
 
 export function doLogin(body: any, role: 'passenger' | 'driver' | 'admin') {
   const email = String(body?.email ?? '').trim().toLowerCase()
@@ -15,7 +14,7 @@ export function doLogin(body: any, role: 'passenger' | 'driver' | 'admin') {
   if (password.length < 8) fields.password = 'Password must be at least 8 characters'
   if (Object.keys(fields).length) throw fail(422, 'VALIDATION', 'Check the highlighted fields.', fields)
 
-  const user = mockUsers.find(u => u.email === email && u.password === password && u.role === role)
+  const user = allUsers().find(u => u.email === email && u.password === password && u.role === role)
   if (!user) throw fail(401, 'INVALID_CREDENTIALS', 'Invalid email or password.')
   if (user.status === 'deactivated') {
     throw fail(403, 'ACCOUNT_DEACTIVATED', 'This account has been deactivated. Please contact the administrator.')

@@ -63,13 +63,12 @@ export function driverProfile(userId: string | null) {
   }
 }
 
-// Testing helper: the admin screen for this comes in Step 6.
+// Testing helper, mock only.
 export function devVerifyPlate(userId: string | null) {
-  const list = stored()
-  const u = list.find(x => x.id === userId)
-  if (u) {
-    u.plateVerified = true
-    write(KEY, list)
+  if (userId) {
+    const overrides = read<Record<string, Partial<MockUser>>>(OVERRIDES_KEY, {})
+    overrides[userId] = { ...overrides[userId], plateVerified: true }
+    write(OVERRIDES_KEY, overrides)
   }
   return driverProfile(userId)
 }
