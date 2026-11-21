@@ -63,7 +63,7 @@ const routes: Route[] = [
   ['PATCH', /^\/admin\/reviews\/([^/]+)\/hidden$/, (m, b, _q, c) => setReviewHidden(uid(c), m[1]!, b)],
   ['GET', /^\/admin\/cancellations$/, (_m, _b, _q, c) => { requireAdmin(uid(c)); return adminCancellations() }],
   ['POST', /^\/admin\/cancellations\/([^/]+)\/excuse$/, (m, b, _q, c) => { requireAdmin(uid(c)); return adminExcuse(m[1]!, b) }],
-    ['POST', /^\/driver\/location$/, (_m, b, _q, c) => setDriverLocation(uid(c), b)],
+  ['POST', /^\/driver\/location$/, (_m, b, _q, c) => setDriverLocation(uid(c), b)],
   ['DELETE', /^\/driver\/location$/, (_m, _b, _q, c) => stopDriverLocation(uid(c))],
   ['GET', /^\/bookings\/([^/]+)\/location$/, (m, _b, _q, c) => getBookingTracking(uid(c), m[1]!)],
 
