@@ -9,6 +9,7 @@ import { places, fareOptions } from './places'
 import { adminSummary, adminUsers, setUserStatus, verifyDriverPlate, adminBookings, requireAdmin } from './admin'
 import { getReviewForBooking, createReview, driverReviews, setReviewHidden } from './reviews'
 import { createReport, myReports, adminReports, adminUpdateReport } from './reports'
+import { setDriverLocation, stopDriverLocation, getBookingTracking, devMoveDriver } from './tracking'
 
 type Query = Record<string, string>
 type Ctx = { userId: string | null }
@@ -62,11 +63,15 @@ const routes: Route[] = [
   ['PATCH', /^\/admin\/reviews\/([^/]+)\/hidden$/, (m, b, _q, c) => setReviewHidden(uid(c), m[1]!, b)],
   ['GET', /^\/admin\/cancellations$/, (_m, _b, _q, c) => { requireAdmin(uid(c)); return adminCancellations() }],
   ['POST', /^\/admin\/cancellations\/([^/]+)\/excuse$/, (m, b, _q, c) => { requireAdmin(uid(c)); return adminExcuse(m[1]!, b) }],
+    ['POST', /^\/driver\/location$/, (_m, b, _q, c) => setDriverLocation(uid(c), b)],
+  ['DELETE', /^\/driver\/location$/, (_m, _b, _q, c) => stopDriverLocation(uid(c))],
+  ['GET', /^\/bookings\/([^/]+)\/location$/, (m, _b, _q, c) => getBookingTracking(uid(c), m[1]!)],
 
-  // Testing helpers, mock only
+    // Testing helpers, mock only
   ['POST', /^\/dev\/bookings\/([^/]+)\/accept$/, (m, b) => devAccept(m[1]!, b)],
   ['POST', /^\/dev\/reset-standing$/, () => devResetStanding()],
-  ['POST', /^\/dev\/driver\/verify$/, (_m, _b, _q, c) => devVerifyPlate(uid(c))]
+  ['POST', /^\/dev\/driver\/verify$/, (_m, _b, _q, c) => devVerifyPlate(uid(c))],
+  ['POST', /^\/dev\/bookings\/([^/]+)\/move-driver$/, (m) => devMoveDriver(m[1]!)]
 ]
 
 export async function mockFetch<T = any>(
