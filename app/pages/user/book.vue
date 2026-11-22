@@ -91,82 +91,95 @@ async function confirm() {
 </script>
 
 <template>
-  <main style="max-width: 640px; margin: 0 auto; padding: 16px">
-    <NuxtLink to="/user/bookings">&larr; My bookings</NuxtLink>
-    <h1>Book a ride</h1>
-    <p>Step {{ draft.step }} of 3</p>
+  <main class="page">
+    <NuxtLink to="/user/bookings" class="back">&larr; Back to bookings</NuxtLink>
 
-    <p v-if="banner" role="alert" style="background: #f8e6e6; color: #8a1c1c; padding: 12px; border-radius: 8px">
+    <div class="stepper" role="img" :aria-label="`Step ${draft.step} of 3`">
+      <template v-for="n in 3" :key="n">
+        <span v-if="n > 1" class="bar" :class="{ 'is-on': draft.step >= n }" />
+        <span class="dot" :class="{ 'is-on': draft.step >= n }">{{ n }}</span>
+      </template>
+    </div>
+
+    <p class="eyebrow">Step {{ draft.step }} of 3</p>
+    <h1>Book a ride</h1>
+
+    <p v-if="banner" role="alert" style="background: #fbeaea; color: #9b1c1c; padding: 12px; border-radius: 10px">
       {{ banner }}
     </p>
 
     <!-- Step 1: where -->
-    <section v-if="draft.step === 1">
-      <h2>Pickup and destination</h2>
+    <section v-if="draft.step === 1" class="card">
+      <h2 style="margin-top: 0">Pickup and destination</h2>
       <ClientOnly>
         <BookingMapPicker :places="places" :pickup-id="draft.pickupId" :destination-id="draft.destinationId" @select="choose" />
         <template #fallback><p>Loading map...</p></template>
       </ClientOnly>
-      <p>Green marker: pickup. Maroon marker: destination. Tap a marker, or use the lists below.</p>
+      <p class="meta">Green marker: pickup. Maroon marker: destination. Tap a marker, or use the lists below.</p>
 
       <label for="pickup">Pickup point</label>
-      <select id="pickup" v-model="draft.pickupId" style="display: block; width: 100%; min-height: 44px">
+      <select id="pickup" v-model="draft.pickupId" style="display: block; width: 100%">
         <option :value="null">Choose pickup</option>
         <option v-for="p in places" :key="p.id" :value="p.id" :disabled="p.id === draft.destinationId">{{ p.name }}</option>
       </select>
 
-      <label for="destination" style="display: block; margin-top: 16px">Destination</label>
-      <select id="destination" v-model="draft.destinationId" style="display: block; width: 100%; min-height: 44px">
+      <label for="destination" style="margin-top: 16px">Destination</label>
+      <select id="destination" v-model="draft.destinationId" style="display: block; width: 100%">
         <option :value="null">Choose destination</option>
         <option v-for="p in places" :key="p.id" :value="p.id" :disabled="p.id === draft.pickupId">{{ p.name }}</option>
       </select>
 
       <div v-if="fares.length" style="margin-top: 16px">
         <h3>Transport and fare</h3>
-        <label v-for="f in fares" :key="f.transport" style="display: block; padding: 12px; border: 1px solid #d1d5db; border-radius: 8px; margin-bottom: 8px">
+        <label v-for="f in fares" :key="f.transport" style="display: block; padding: 12px; border: 1px solid #d1d5db; border-radius: 10px; margin-bottom: 8px; font-weight: 500">
           <input v-model="draft.transport" type="radio" name="transport" :value="f.transport" />
           {{ f.transport }}: &#8369;{{ f.fareMin }} to &#8369;{{ f.fareMax }}, about {{ f.minutes }} min
         </label>
       </div>
 
-      <button :disabled="!step1Ready" style="margin-top: 16px; min-height: 44px; padding: 0 24px" @click="toStep2">Next</button>
+      <button class="btn-primary btn-block" :disabled="!step1Ready" style="margin-top: 16px" @click="toStep2">Next</button>
     </section>
 
     <!-- Step 2: when and how many -->
-    <section v-else-if="draft.step === 2">
-      <h2>Date, time, and passengers</h2>
+    <section v-else-if="draft.step === 2" class="card">
+      <h2 style="margin-top: 0">Date, time, and passengers</h2>
 
       <label for="when">Pickup date and time</label>
-      <input id="when" v-model="draft.pickupAt" type="datetime-local" :min="minDate" style="display: block; width: 100%; min-height: 44px" />
-      <small v-if="errors.pickupAt" style="color: #8a1c1c">{{ errors.pickupAt }}</small>
+      <input id="when" v-model="draft.pickupAt" type="datetime-local" :min="minDate" style="display: block; width: 100%" />
+      <small v-if="errors.pickupAt" style="color: #9b1c1c">{{ errors.pickupAt }}</small>
 
-      <label for="pax" style="display: block; margin-top: 16px">Passengers (1 to 6)</label>
-      <input id="pax" v-model.number="draft.passengers" type="number" min="1" max="6" style="display: block; width: 100%; min-height: 44px" />
-      <small v-if="errors.passengers" style="color: #8a1c1c">{{ errors.passengers }}</small>
+      <label for="pax" style="margin-top: 16px">Passengers (1 to 6)</label>
+      <input id="pax" v-model.number="draft.passengers" type="number" min="1" max="6" style="display: block; width: 100%" />
+      <small v-if="errors.passengers" style="color: #9b1c1c">{{ errors.passengers }}</small>
 
-      <div style="margin-top: 16px">
-        <button style="min-height: 44px; padding: 0 24px" @click="draft.step = 1">Back</button>
-        <button style="min-height: 44px; padding: 0 24px; margin-left: 8px" @click="toStep3">Next</button>
+      <div class="card-actions">
+        <button @click="draft.step = 1">Back</button>
+        <button class="btn-primary" @click="toStep3">Next</button>
       </div>
     </section>
 
     <!-- Step 3: review -->
-    <section v-else>
-      <h2>Review and confirm</h2>
-      <ul>
-        <li>From: {{ nameOf(draft.pickupId) }}</li>
-        <li>To: {{ nameOf(draft.destinationId) }}</li>
-        <li>Transport: {{ draft.transport }}</li>
-        <li v-if="selectedFare">Estimated fare: &#8369;{{ selectedFare.fareMin }} to &#8369;{{ selectedFare.fareMax }}</li>
-        <li>Pickup: {{ new Date(draft.pickupAt).toLocaleString('en-PH', { dateStyle: 'medium', timeStyle: 'short' }) }}</li>
-        <li>Passengers: {{ draft.passengers }}</li>
-      </ul>
-      <p>Cancelling an accepted booking is only allowed within 30 minutes after the driver accepts it.</p>
+    <section v-else class="card">
+      <h2 style="margin-top: 0">Review and confirm</h2>
+      <div class="box"><span class="k">From</span><span class="v">{{ nameOf(draft.pickupId) }}</span></div>
+      <div class="box"><span class="k">To</span><span class="v">{{ nameOf(draft.destinationId) }}</span></div>
+      <div class="box"><span class="k">Transport</span><span class="v">{{ draft.transport }}</span></div>
+      <div v-if="selectedFare" class="box">
+        <span class="k">Estimated fare</span><span class="v">&#8369;{{ selectedFare.fareMin }} to &#8369;{{ selectedFare.fareMax }}</span>
+      </div>
+      <div class="box">
+        <span class="k">Pickup</span>
+        <span class="v">{{ new Date(draft.pickupAt).toLocaleString('en-PH', { dateStyle: 'medium', timeStyle: 'short' }) }}</span>
+      </div>
+      <div class="box"><span class="k">Passengers</span><span class="v">{{ draft.passengers }}</span></div>
+      <p class="meta" style="margin-top: 12px">Cancelling an accepted booking is only allowed within 30 minutes after the driver accepts it.</p>
 
-      <button style="min-height: 44px; padding: 0 24px" @click="draft.step = 2">Back</button>
-      <button :disabled="saving" style="min-height: 44px; padding: 0 24px; margin-left: 8px; background: #1b6b3a; color: #fff; border: 0; border-radius: 8px" @click="confirm">
-        {{ saving ? 'Sending...' : 'Confirm booking' }}
-      </button>
+      <div class="card-actions">
+        <button @click="draft.step = 2">Back</button>
+        <button class="btn-primary" :disabled="saving" @click="confirm">
+          {{ saving ? 'Sending...' : 'Confirm booking' }}
+        </button>
+      </div>
     </section>
   </main>
 </template>

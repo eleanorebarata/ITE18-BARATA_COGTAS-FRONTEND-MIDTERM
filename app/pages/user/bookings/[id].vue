@@ -151,7 +151,7 @@ const when = (iso: string) => new Date(iso).toLocaleString('en-PH', { dateStyle:
       
       <DriverTracker :booking="booking" />
       <BookingExtras :booking="booking" />
-      <section v-if="config.public.useMock" style="margin-top: 32px; border: 2px dashed #b58900; border-radius: 12px; padding: 16px">
+ <section v-if="config.public.useMock && config.public.showDevTools" style="margin-top: 32px; border: 2px dashed #b58900; border-radius: 12px; padding: 16px">
         <strong>Testing tools (mock only, removed before the Final)</strong>
         <div style="margin-top: 8px; display: flex; flex-wrap: wrap; gap: 8px">
           <button v-if="booking.status === 'Pending'" @click="simulateAccept(0)">Driver accepts now</button>

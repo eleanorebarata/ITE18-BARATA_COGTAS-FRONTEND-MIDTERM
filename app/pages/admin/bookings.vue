@@ -29,12 +29,13 @@ const when = (iso: string) => new Date(iso).toLocaleString('en-PH', { dateStyle:
 </script>
 
 <template>
-  <main style="max-width: 1000px; margin: 0 auto; padding: 16px">
-    <AdminNav />
-    <h1>Bookings</h1>
+  <main class="page">
+    <p class="eyebrow">Operations</p>
+    <h1>Bookings overview</h1>
 
-    <label>Status
-      <select v-model="status" style="display: block; min-height: 44px; margin-bottom: 16px">
+    <div class="card">
+      <label for="b-status">Status</label>
+      <select id="b-status" v-model="status" class="search">
         <option value="">All</option>
         <option>Pending</option>
         <option>Accepted</option>
@@ -42,36 +43,22 @@ const when = (iso: string) => new Date(iso).toLocaleString('en-PH', { dateStyle:
         <option>Completed</option>
         <option>Cancelled</option>
       </select>
-    </label>
+    </div>
 
     <p v-if="loading">Loading...</p>
-    <p v-else-if="loadError" role="alert" style="color: #8a1c1c">{{ loadError }}</p>
-    <p v-else-if="!bookings.length">No bookings match this filter.</p>
+    <p v-else-if="loadError" role="alert" style="color: #9b1c1c">{{ loadError }}</p>
+    <p v-else-if="!bookings.length" class="empty">No bookings match this filter.</p>
 
-    <div v-else style="overflow-x: auto">
-      <table style="width: 100%; border-collapse: collapse; min-width: 720px">
-        <thead>
-          <tr style="text-align: left; border-bottom: 2px solid #d1d5db">
-            <th scope="col" style="padding: 8px">Status</th>
-            <th scope="col" style="padding: 8px">Route</th>
-            <th scope="col" style="padding: 8px">Pickup time</th>
-            <th scope="col" style="padding: 8px">Passengers</th>
-            <th scope="col" style="padding: 8px">Driver</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="b in bookings" :key="b.id" style="border-bottom: 1px solid #e5e7eb">
-            <td style="padding: 8px"><StatusBadge :status="b.status" /></td>
-            <td style="padding: 8px">{{ b.pickup }} to {{ b.destination }}</td>
-            <td style="padding: 8px">{{ when(b.pickupAt) }}</td>
-            <td style="padding: 8px">{{ b.passengers }}</td>
-            <td style="padding: 8px">
-              <template v-if="b.driver">{{ b.driver.name }}<br /><small>{{ b.driver.plateNumber }}</small></template>
-              <template v-else>-</template>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    <article v-for="b in bookings" v-else :key="b.id" class="card">
+      <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px">
+        <span class="meta">{{ b.transport }}</span>
+        <StatusBadge :status="b.status" />
+      </div>
+      <h2 style="font-size: 1.05rem; margin: 6px 0 4px">{{ b.pickup }} &rarr; {{ b.destination }}</h2>
+      <p class="meta">{{ when(b.pickupAt) }} &middot; {{ b.passengers }} passenger(s)</p>
+      <div v-if="b.driver" class="box">
+        <span class="k">Driver</span><span class="v">{{ b.driver.name }} &middot; {{ b.driver.plateNumber }}</span>
+      </div>
+    </article>
   </main>
 </template>

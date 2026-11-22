@@ -22,3 +22,12 @@ To use the real API later, set `NUXT_PUBLIC_USE_MOCK=false` and `NUXT_PUBLIC_API
 - Drivers must give a valid reason to decline and need a verified plate to accept.
 - Accounts are deactivated, never deleted.
 - Driver location is shared only during an accepted ride.
+## Tests
+    npm test
+
+## Release
+    npm run generate
+Publish the folder `.output/public`. Set `showDevTools: false` in `nuxt.config.ts` for the final version.
+
+## Not included (backend team)
+Real authentication, database, WebSocket for live GPS, and server-side enforcement of every rule above.

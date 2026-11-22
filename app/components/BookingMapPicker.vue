@@ -9,11 +9,12 @@ const el = ref<HTMLElement>()
 let map: any
 let L: any
 let line: any
+let gone = false
 const markers = new Map<string, any>()
 
 function colorFor(id: string) {
-  if (id === props.pickupId) return '#1b6b3a'
-  if (id === props.destinationId) return '#8a1c1c'
+  if (id === props.pickupId) return '#1d6b3b'
+  if (id === props.destinationId) return '#9b1c1c'
   return '#4b5563'
 }
 
@@ -35,9 +36,11 @@ function redraw() {
 
 onMounted(async () => {
   const mod: any = await import('leaflet')
+  // The page may have been closed while the map library was loading.
+  if (gone || !el.value) return
   L = mod.default ?? mod
 
-  map = L.map(el.value!)
+  map = L.map(el.value)
   L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
     attribution: '&copy; OpenStreetMap contributors'
@@ -51,13 +54,21 @@ onMounted(async () => {
     markers.set(p.id, m)
   }
 
-  map.fitBounds(props.places.map(p => [p.lat, p.lng]), { padding: [40, 40] })
+  if (props.places.length) {
+    map.fitBounds(props.places.map(p => [p.lat, p.lng]), { padding: [40, 40] })
+  } else {
+    map.setView([8.9552, 125.5975], 15)
+  }
   redraw()
 })
 
 watch(() => [props.pickupId, props.destinationId], redraw)
 
-onBeforeUnmount(() => map?.remove())
+onBeforeUnmount(() => {
+  gone = true
+  map?.remove()
+  map = null
+})
 </script>
 
 <template>

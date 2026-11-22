@@ -4,9 +4,12 @@ import {
   getBooking, cancelBooking, createBooking, listBookings, getStanding, devAccept, devResetStanding,
   driverBookings, driverAccept, driverDecline, driverComplete, adminCancellations, adminExcuse
 } from './bookings'
-import { registerDriver, driverProfile, devVerifyPlate } from './drivers'
-import { places, fareOptions } from './places'
-import { adminSummary, adminUsers, setUserStatus, verifyDriverPlate, adminBookings, requireAdmin } from './admin'
+import { registerDriver, registerPassenger, driverProfile, devVerifyPlate } from './drivers'
+import { activePlaces, fareOptions, fareRules } from './places'
+import {
+  adminSummary, adminUsers, setUserStatus, verifyDriverPlate, adminBookings, requireAdmin,
+  adminPlaces, addPlace, updatePlace, saveRules
+} from './admin'
 import { getReviewForBooking, createReview, driverReviews, setReviewHidden } from './reviews'
 import { createReport, myReports, adminReports, adminUpdateReport } from './reports'
 import { setDriverLocation, stopDriverLocation, getBookingTracking, devMoveDriver } from './tracking'
@@ -25,11 +28,14 @@ const routes: Route[] = [
   ['POST', /^\/auth\/driver-login$/, (_m, b) => doLogin(b, 'driver')],
   ['POST', /^\/auth\/admin-login$/, (_m, b) => doLogin(b, 'admin')],
   ['POST', /^\/auth\/driver-register$/, (_m, b) => registerDriver(b)],
+  ['POST', /^\/auth\/user-register$/, (_m, b) => registerPassenger(b)],
 
-  ['GET', /^\/places$/, () => places],
+  ['GET', /^\/places$/, () => activePlaces()],
+  ['GET', /^\/fare-rules$/, () => fareRules()],
   ['GET', /^\/fares$/, (_m, _b, q) => {
-    const from = places.find(p => p.id === q.from)
-    const to = places.find(p => p.id === q.to)
+    const list = activePlaces()
+    const from = list.find(p => p.id === q.from)
+    const to = list.find(p => p.id === q.to)
     if (!from || !to || from.id === to.id) throw fail(422, 'VALIDATION', 'Choose two different places.')
     return fareOptions(from, to)
   }],
@@ -52,6 +58,9 @@ const routes: Route[] = [
   ['POST', /^\/driver\/bookings\/([^/]+)\/accept$/, (m, _b, _q, c) => driverAccept(m[1]!, uid(c))],
   ['POST', /^\/driver\/bookings\/([^/]+)\/decline$/, (m, b, _q, c) => driverDecline(m[1]!, uid(c), b)],
   ['POST', /^\/driver\/bookings\/([^/]+)\/complete$/, (m, _b, _q, c) => driverComplete(m[1]!, uid(c))],
+  ['POST', /^\/driver\/location$/, (_m, b, _q, c) => setDriverLocation(uid(c), b)],
+  ['DELETE', /^\/driver\/location$/, (_m, _b, _q, c) => stopDriverLocation(uid(c))],
+  ['GET', /^\/bookings\/([^/]+)\/location$/, (m, _b, _q, c) => getBookingTracking(uid(c), m[1]!)],
 
   ['GET', /^\/admin\/summary$/, (_m, _b, _q, c) => adminSummary(uid(c))],
   ['GET', /^\/admin\/users$/, (_m, _b, q, c) => adminUsers(uid(c), q)],
@@ -63,11 +72,12 @@ const routes: Route[] = [
   ['PATCH', /^\/admin\/reviews\/([^/]+)\/hidden$/, (m, b, _q, c) => setReviewHidden(uid(c), m[1]!, b)],
   ['GET', /^\/admin\/cancellations$/, (_m, _b, _q, c) => { requireAdmin(uid(c)); return adminCancellations() }],
   ['POST', /^\/admin\/cancellations\/([^/]+)\/excuse$/, (m, b, _q, c) => { requireAdmin(uid(c)); return adminExcuse(m[1]!, b) }],
-  ['POST', /^\/driver\/location$/, (_m, b, _q, c) => setDriverLocation(uid(c), b)],
-  ['DELETE', /^\/driver\/location$/, (_m, _b, _q, c) => stopDriverLocation(uid(c))],
-  ['GET', /^\/bookings\/([^/]+)\/location$/, (m, _b, _q, c) => getBookingTracking(uid(c), m[1]!)],
+  ['GET', /^\/admin\/places$/, (_m, _b, _q, c) => adminPlaces(uid(c))],
+  ['POST', /^\/admin\/places$/, (_m, b, _q, c) => addPlace(uid(c), b)],
+  ['PATCH', /^\/admin\/places\/([^/]+)$/, (m, b, _q, c) => updatePlace(uid(c), m[1]!, b)],
+  ['PUT', /^\/admin\/fare-rules$/, (_m, b, _q, c) => saveRules(uid(c), b)],
 
-    // Testing helpers, mock only
+  // Testing helpers, mock only
   ['POST', /^\/dev\/bookings\/([^/]+)\/accept$/, (m, b) => devAccept(m[1]!, b)],
   ['POST', /^\/dev\/reset-standing$/, () => devResetStanding()],
   ['POST', /^\/dev\/driver\/verify$/, (_m, _b, _q, c) => devVerifyPlate(uid(c))],

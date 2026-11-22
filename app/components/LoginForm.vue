@@ -3,15 +3,28 @@ import { z } from 'zod'
 import type { Role } from '~/types/api'
 import { useAuthService } from '~/services/auth'
 
-const props = defineProps<{ role: Role; title: string }>()
+const props = defineProps<{ role: Role; title?: string }>()
 
 const auth = useAuthStore()
 const authService = useAuthService()
+
+const tabs = [
+  { to: '/auth/user-login', label: 'Passenger' },
+  { to: '/auth/driver-login', label: 'Driver' },
+  { to: '/auth/admin-login', label: 'Administrator' }
+]
+
+const copy = {
+  passenger: { sub: 'For students, commuters, and campus visitors.', label: 'Email', ph: 'Enter your email', create: '/auth/user-register' },
+  driver: { sub: 'For approved CSU Mobility drivers.', label: 'Email', ph: 'Enter your email', create: '/auth/driver-register' },
+  admin: { sub: 'For authorized CSU Mobility administrators.', label: 'CSU administrator email', ph: 'Enter your @carsu.edu.ph email', create: '' }
+} as const
 
 const form = reactive({ email: '', password: '' })
 const errors = reactive<{ email?: string; password?: string }>({})
 const banner = ref('')
 const loading = ref(false)
+const showPw = ref(false)
 
 const schema = computed(() =>
   z.object({
@@ -51,28 +64,47 @@ async function submit() {
 </script>
 
 <template>
-  <main style="max-width: 400px; margin: 48px auto; padding: 0 16px">
-    <h1>{{ title }}</h1>
+  <main class="auth-panel">
+    <div class="auth-head">
+      <BrandMark :size="38" />
+      <div><strong>CSU Mobility</strong><small>Caraga State University</small></div>
+    </div>
 
-    <p v-if="banner" role="alert" style="background: #f8e6e6; color: #8a1c1c; padding: 12px; border-radius: 8px">
+    <p class="eyebrow">Welcome back</p>
+    <h1>Log in</h1>
+    <p class="lead">{{ copy[role].sub }}</p>
+
+    <AuthTabs :tabs="tabs" />
+
+    <p v-if="banner" role="alert" style="background: #fbeaea; color: #9b1c1c; padding: 12px; border-radius: 10px">
       {{ banner }}
     </p>
 
     <form novalidate @submit.prevent="submit">
-      <label for="email">Email</label>
-      <input id="email" v-model="form.email" type="email" autocomplete="email"
-             :aria-invalid="!!errors.email" style="display: block; width: 100%; min-height: 44px" />
-      <small v-if="errors.email" style="color: #8a1c1c">{{ errors.email }}</small>
+      <div style="margin-bottom: 14px">
+        <label for="email">{{ copy[role].label }}</label>
+        <input id="email" v-model="form.email" type="email" autocomplete="email" :placeholder="copy[role].ph"
+               :aria-invalid="!!errors.email" style="width: 100%" />
+        <small v-if="errors.email" style="color: #9b1c1c">{{ errors.email }}</small>
+      </div>
 
-      <label for="password" style="display: block; margin-top: 16px">Password</label>
-      <input id="password" v-model="form.password" type="password" autocomplete="current-password"
-             :aria-invalid="!!errors.password" style="display: block; width: 100%; min-height: 44px" />
-      <small v-if="errors.password" style="color: #8a1c1c">{{ errors.password }}</small>
+      <div style="margin-bottom: 18px">
+        <label for="password">Password</label>
+        <div class="pw">
+          <input id="password" v-model="form.password" :type="showPw ? 'text' : 'password'" autocomplete="current-password"
+                 placeholder="Enter your password" :aria-invalid="!!errors.password" />
+          <button type="button" class="toggle" :aria-pressed="showPw" @click="showPw = !showPw">{{ showPw ? 'Hide' : 'Show' }}</button>
+        </div>
+        <small v-if="errors.password" style="color: #9b1c1c">{{ errors.password }}</small>
+      </div>
 
-      <button type="submit" :disabled="loading"
-              style="margin-top: 24px; width: 100%; min-height: 44px; background: #1b6b3a; color: #fff; border: 0; border-radius: 8px">
+      <button type="submit" class="btn-primary btn-block" :disabled="loading">
         {{ loading ? 'Logging in...' : 'Log in' }}
       </button>
     </form>
+
+    <p v-if="copy[role].create" class="center" style="margin-top: 16px">
+      <NuxtLink :to="copy[role].create">Create account</NuxtLink>
+    </p>
   </main>
 </template>

@@ -76,7 +76,7 @@ async function moveDriver() {
       </ClientOnly>
     </template>
 
-    <div v-if="config.public.useMock" style="margin-top: 16px; border: 2px dashed #b58900; border-radius: 12px; padding: 16px">
+  <div v-if="config.public.useMock && config.public.showDevTools" style="margin-top: 16px;  border: 2px dashed #b58900; border-radius: 12px; padding: 16px">
       <strong>Testing tools (mock only, removed before the Final)</strong>
       <div style="margin-top: 8px">
         <button type="button" @click="moveDriver">Move driver closer</button>
