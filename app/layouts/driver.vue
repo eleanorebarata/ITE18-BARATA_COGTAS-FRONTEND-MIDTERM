@@ -1,11 +1,10 @@
 <script setup lang="ts">
 const tabs = [
   { to: '/driver/requests', label: 'Requests', icon: 'inbox' },
-  { to: '/routes', label: 'Fares', icon: 'tag' },
-  { to: '/reports', label: 'Reports', icon: 'flag' }
+  { to: '/driver/account', label: 'Account', icon: 'user', also: ['/reports', '/routes'] }
 ]
 </script>
 
 <template>
-  <AppShell :tabs="tabs" home="/driver/requests" login-to="/auth/driver-login"><slot /></AppShell>
+  <AppShell :tabs="tabs" home="/driver/requests" login-to="/auth/driver-login" minimal><slot /></AppShell>
 </template>

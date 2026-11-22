@@ -5,11 +5,11 @@ const PLACES_KEY = 'csu_mock_places'
 const RULES_KEY = 'csu_mock_fare_rules'
 
 const seedPlaces: Place[] = [
-  { id: 'p-gate', name: 'CSU Main Gate', lat: 8.9552, lng: 125.5975, active: true },
-  { id: 'p-ccis', name: 'CCIS Building', lat: 8.956, lng: 125.599, active: true },
-  { id: 'p-library', name: 'University Library', lat: 8.9565, lng: 125.5983, active: true },
-  { id: 'p-canteen', name: 'Campus Canteen', lat: 8.9558, lng: 125.598, active: true },
-  { id: 'p-terminal', name: 'Ampayon Terminal', lat: 8.954, lng: 125.596, active: true }
+  { id: 'p-gate', name: 'CSU Main Gate', description: 'Main entrance of the campus.', address: 'CSU Main Campus, Ampayon, Butuan City', lat: 8.9552, lng: 125.5975, active: true },
+  { id: 'p-ccis', name: 'CCIS Building', description: 'Covered waiting area near the computing college.', address: 'CCIS Complex, CSU Main Campus', lat: 8.956, lng: 125.599, active: true },
+  { id: 'p-library', name: 'University Library', description: 'Pickup bay beside the library entrance.', address: 'University Library, CSU Main Campus', lat: 8.9565, lng: 125.5983, active: true },
+  { id: 'p-canteen', name: 'Campus Canteen', description: 'Drop-off point near the campus canteen.', address: 'Campus Canteen, CSU Main Campus', lat: 8.9558, lng: 125.598, active: true },
+  { id: 'p-terminal', name: 'Ampayon Terminal', description: 'Public transport stop near the terminal.', address: 'Ampayon, Butuan City', lat: 8.954, lng: 125.596, active: true }
 ]
 
 // Sample numbers. Replace with the real fare table from the campus transport office.

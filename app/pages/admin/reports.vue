@@ -82,51 +82,50 @@ const when = (iso: string) => new Date(iso).toLocaleString('en-PH', { dateStyle:
 </script>
 
 <template>
-  <main style="max-width: 900px; margin: 0 auto; padding: 16px">
-    <AdminNav />
+  <main class="page">
+    <p class="eyebrow">Safety</p>
     <h1>Reports</h1>
 
-    <label>Status
-      <select v-model="status" style="display: block; min-height: 44px; margin-bottom: 16px">
+    <div class="card">
+      <label for="r-status">Status</label>
+      <select id="r-status" v-model="status" class="search">
         <option value="">All</option>
         <option>Open</option>
         <option>Under review</option>
         <option>Resolved</option>
         <option>Dismissed</option>
       </select>
-    </label>
+    </div>
 
-    <p v-if="banner" role="status" style="background: #e6f2ea; padding: 12px; border-radius: 8px">{{ banner }}</p>
+    <p v-if="banner" role="status" style="background: #e6f2ea; padding: 12px">{{ banner }}</p>
     <p v-if="loading">Loading...</p>
-    <p v-else-if="loadError" role="alert" style="color: #8a1c1c">{{ loadError }}</p>
-    <p v-else-if="!reports.length">No reports with this status.</p>
+    <p v-else-if="loadError" role="alert" style="color: #9b1c1c">{{ loadError }}</p>
+    <p v-else-if="!reports.length" class="empty">No reports with this status.</p>
 
-    <ul v-else style="list-style: none; padding: 0">
-      <li v-for="r in reports" :key="r.id" style="border: 1px solid #d1d5db; border-radius: 12px; padding: 16px; margin-bottom: 12px">
-        <strong>{{ r.status }}</strong> &middot; {{ r.categoryLabel }}
-        <p style="margin: 8px 0 0">
-          <small>
-            From {{ r.reporterName }} ({{ r.reporterRole }}) about
-            {{ r.targetType === 'review' ? `a review of ${r.targetName}` : `${r.targetName} (${r.targetType})` }}
-            &middot; {{ when(r.createdAt) }}
-          </small>
-        </p>
-        <p style="margin: 8px 0">{{ r.description }}</p>
-        <p v-if="r.adminNote" style="margin: 0 0 8px"><small>Admin note: {{ r.adminNote }}</small></p>
+    <article v-for="r in reports" v-else :key="r.id" class="card">
+      <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px">
+        <span class="tag">{{ r.status }}</span>
+        <span class="meta">{{ when(r.createdAt) }}</span>
+      </div>
+      <h2 style="font-size: 1rem; margin: 8px 0 2px">{{ r.categoryLabel }}</h2>
+      <p class="meta">
+        From {{ r.reporterName }} ({{ r.reporterRole }}) about
+        {{ r.targetType === 'review' ? `a review of ${r.targetName}` : `${r.targetName} (${r.targetType})` }}
+      </p>
+      <div class="box"><span class="v" style="font-weight: 400">{{ r.description }}</span></div>
+      <p v-if="r.adminNote" class="meta">Admin note: {{ r.adminNote }}</p>
 
-        <div style="display: flex; flex-wrap: wrap; gap: 8px">
-          <button v-if="r.status === 'Open'" style="min-height: 44px" @click="underReview(r)">Mark under review</button>
-          <template v-if="r.status === 'Open' || r.status === 'Under review'">
-            <button style="min-height: 44px; background: #1b6b3a; color: #fff; border: 0; border-radius: 8px; padding: 0 16px" @click="openDialog(r, 'Resolved')">Resolve</button>
-            <button style="min-height: 44px" @click="openDialog(r, 'Dismissed')">Dismiss</button>
-          </template>
-          <button v-if="r.reviewId" style="min-height: 44px" @click="toggleHidden(r)">
-            {{ r.reviewHidden ? 'Show review again' : 'Hide review' }}
-          </button>
-          <NuxtLink to="/admin/users" style="line-height: 44px">Open users and drivers</NuxtLink>
-        </div>
-      </li>
-    </ul>
+      <div class="card-actions">
+        <button v-if="r.status === 'Open'" type="button" @click="underReview(r)">Mark under review</button>
+        <template v-if="r.status === 'Open' || r.status === 'Under review'">
+          <button type="button" class="btn-primary" @click="openDialog(r, 'Resolved')">Resolve</button>
+          <button type="button" @click="openDialog(r, 'Dismissed')">Dismiss</button>
+        </template>
+        <button v-if="r.reviewId" type="button" @click="toggleHidden(r)">
+          {{ r.reviewHidden ? 'Show review again' : 'Hide review' }}
+        </button>
+      </div>
+    </article>
 
     <ReasonDialog
       ref="dialog"

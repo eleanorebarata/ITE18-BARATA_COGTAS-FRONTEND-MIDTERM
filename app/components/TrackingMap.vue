@@ -42,9 +42,10 @@ function sync() {
 
 onMounted(async () => {
   const mod: any = await import('leaflet')
+ if (!el.value) return
   L = mod.default ?? mod
 
-  map = L.map(el.value!)
+  map = L.map(el.value)
   L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
     attribution: '&copy; OpenStreetMap contributors'

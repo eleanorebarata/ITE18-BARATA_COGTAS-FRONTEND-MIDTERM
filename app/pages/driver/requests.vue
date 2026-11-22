@@ -4,7 +4,6 @@ import { useDriverService } from '~/services/driver'
 
 definePageMeta({ middleware: ['auth', 'role'], role: 'driver' })
 
-const auth = useAuthStore()
 const service = useDriverService()
 const config = useRuntimeConfig()
 
@@ -103,75 +102,62 @@ async function verify() {
   profile.value = await service.devVerify()
 }
 
-function logout() {
-  auth.logout()
-  navigateTo('/auth/driver-login')
-}
-
 const when = (iso: string) => new Date(iso).toLocaleString('en-PH', { dateStyle: 'medium', timeStyle: 'short' })
 </script>
 
 <template>
-  <main style="max-width: 640px; margin: 0 auto; padding: 16px">
-    <h1>Driver</h1>
+  <main class="page">
+    <p class="eyebrow">Driver workspace</p>
+    <h1>Good day, {{ profile?.name ?? 'driver' }}</h1>
 
     <p v-if="loading">Loading...</p>
-    <p v-else-if="loadError" role="alert" style="color: #8a1c1c">{{ loadError }}</p>
+    <p v-else-if="loadError" role="alert" style="color: #9b1c1c">{{ loadError }}</p>
 
     <template v-else-if="profile">
-      <p style="margin: 0">{{ profile.name }} &middot; {{ profile.vehicleType }} &middot; Plate <strong>{{ profile.plateNumber }}</strong></p>
-      <DriverLocationShare :has-active-ride="schedule.length > 0" />
-      <p v-if="!profile.plateVerified" role="status" style="background: #fdf3cc; padding: 12px; border-radius: 8px; margin-top: 16px">
+      <p v-if="!profile.plateVerified" role="status" style="background: #fdf3cc; padding: 12px; margin-bottom: 12px">
         Your plate number is waiting for administrator verification. You cannot accept requests yet.
       </p>
+      <p v-if="banner" role="status" style="background: #e6f2ea; padding: 12px; margin-bottom: 12px">{{ banner }}</p>
 
-      <p v-if="banner" role="status" style="background: #e6f2ea; padding: 12px; border-radius: 8px">{{ banner }}</p>
-
-      <div role="tablist" style="display: flex; gap: 8px; margin: 24px 0 16px">
-        <button v-for="(label, key) in tabLabels" :key="key" role="tab" :aria-selected="tab === key"
-                :style="{ minHeight: '44px', padding: '0 16px', fontWeight: tab === key ? '700' : '400', background: tab === key ? '#e6f2ea' : '#fff', border: '1px solid #d1d5db', borderRadius: '8px' }"
-                @click="tab = key as typeof tab">
+      <div class="segmented" role="tablist">
+        <button v-for="(label, key) in tabLabels" :key="key" type="button" role="tab" :aria-selected="tab === key"
+                :class="{ 'is-active': tab === key }" @click="tab = key as typeof tab">
           {{ label }} ({{ counts[key] }})
         </button>
       </div>
 
-      <p v-if="!shown.length">{{ emptyText[tab] }}</p>
+      <p v-if="!shown.length" class="empty">{{ emptyText[tab] }}</p>
 
-      <ul v-else style="list-style: none; padding: 0; margin: 0">
-        <li v-for="b in shown" :key="b.id" style="border: 1px solid #d1d5db; border-radius: 12px; padding: 16px; margin-bottom: 12px">
+      <article v-for="b in shown" v-else :key="b.id" class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px">
+          <span class="meta">{{ b.transport }}</span>
           <StatusBadge :status="b.status" />
-          <h2 style="font-size: 18px; margin: 8px 0">{{ b.pickup }} to {{ b.destination }}</h2>
-          <p style="margin: 0">{{ when(b.pickupAt) }} &middot; {{ b.passengers }} passenger(s) &middot; {{ b.transport }}</p>
-          <p v-if="b.fareMin" style="margin: 4px 0 0">Fare: &#8369;{{ b.fareMin }} to &#8369;{{ b.fareMax }}</p>
-          <p v-if="b.passengerName" style="margin: 4px 0 0">Passenger: {{ b.passengerName }}</p>
-          <div v-if="tab !== 'requests' && b.driver" style="margin-top: 8px">
-            <ReportButton :booking-id="b.id" target-type="passenger" label="Report passenger" />
-          </div>
+        </div>
+        <h2 style="font-size: 1.05rem; margin: 6px 0 4px">{{ b.pickup }} &rarr; {{ b.destination }}</h2>
+        <p class="meta">{{ when(b.pickupAt) }} &middot; {{ b.passengers }} passenger(s)</p>
 
-          <div v-if="tab === 'requests'" style="margin-top: 12px; display: flex; gap: 8px">
-            <button :disabled="!profile.plateVerified || busyId === b.id"
-                    style="min-height: 44px; padding: 0 20px; background: #1b6b3a; color: #fff; border: 0; border-radius: 8px"
-                    @click="accept(b.id)">
-              {{ busyId === b.id ? 'Working...' : 'Accept' }}
-            </button>
-            <button :disabled="busyId === b.id"
-                    style="min-height: 44px; padding: 0 20px; background: #fff; color: #8a1c1c; border: 2px solid #8a1c1c; border-radius: 8px"
-                    @click="openDecline(b.id)">
-              Decline
-            </button>
-          </div>
+        <div v-if="b.passengerName" class="box"><span class="k">Passenger</span><span class="v">{{ b.passengerName }}</span></div>
+        <div v-if="b.fareMin" class="box"><span class="k">Estimated fare</span><span class="v">&#8369;{{ b.fareMin }}&ndash;&#8369;{{ b.fareMax }}</span></div>
 
-          <div v-else-if="tab === 'schedule'" style="margin-top: 12px">
-            <button :disabled="busyId === b.id"
-                    style="min-height: 44px; padding: 0 20px; background: #1b6b3a; color: #fff; border: 0; border-radius: 8px"
-                    @click="complete(b.id)">
-              Mark as completed
-            </button>
-          </div>
-        </li>
-      </ul>
+        <div v-if="tab !== 'requests' && b.driver" style="margin-top: 8px">
+          <ReportButton :booking-id="b.id" target-type="passenger" label="Report passenger" />
+        </div>
 
-<section v-if="config.public.useMock && config.public.showDevTools" style="margin-top: 32px; border: 2px dashed #b58900; border-radius: 12px; padding: 16px">
+        <div v-if="tab === 'requests'" class="card-actions">
+          <button type="button" class="btn-primary" :disabled="!profile.plateVerified || busyId === b.id" @click="accept(b.id)">
+            {{ busyId === b.id ? 'Working...' : 'Accept' }}
+          </button>
+          <button type="button" :disabled="busyId === b.id" @click="openDecline(b.id)">Decline</button>
+        </div>
+
+        <div v-else-if="tab === 'schedule'" class="card-actions">
+          <button type="button" class="btn-primary" :disabled="busyId === b.id" @click="complete(b.id)">Mark as completed</button>
+        </div>
+      </article>
+
+      <DriverLocationShare :has-active-ride="schedule.length > 0" />
+
+      <section v-if="config.public.useMock && config.public.showDevTools" style="margin-top: 24px; border: 2px dashed #b58900; border-radius: 12px; padding: 16px">
         <strong>Testing tools (mock only)</strong>
         <div style="margin-top: 8px">
           <button :disabled="profile.plateVerified" @click="verify">Pretend the admin verified my plate</button>

@@ -4,6 +4,11 @@ import { useDriverService } from '~/services/driver'
 
 const service = useDriverService()
 
+const regTabs = [
+  { to: '/auth/user-register', label: 'Passenger' },
+  { to: '/auth/driver-register', label: 'Driver' }
+]
+
 const form = reactive<Record<string, string>>({
   name: '', email: '', contact: '', plateNumber: '', vehicleType: '', password: ''
 })
@@ -17,7 +22,7 @@ const fields = [
   { key: 'email', label: 'Email', type: 'email', auto: 'email' },
   { key: 'contact', label: 'Contact number (09XXXXXXXXX)', type: 'tel', auto: 'tel' },
   { key: 'plateNumber', label: 'Plate number', type: 'text', auto: 'off' },
-  { key: 'password', label: 'Password (at least 8 characters)', type: 'password', auto: 'new-password' }
+  { key: 'password', label: 'Password (8+ characters)', type: 'password', auto: 'new-password' }
 ]
 
 const schema = z.object({
@@ -65,38 +70,43 @@ async function submit() {
 </script>
 
 <template>
-  <main style="max-width: 400px; margin: 48px auto; padding: 0 16px">
-    <h1>Driver registration</h1>
+  <main style="max-width: 420px">
+        <AuthBrand />
+    <NuxtLink to="/auth/driver-login" class="back">&larr; Back to login</NuxtLink>
+    <p class="eyebrow">Join CSU Mobility</p>
+    <h1>Create account</h1>
+    <AuthTabs :tabs="regTabs" />
 
-    <div v-if="done" role="status" style="background: #e6f2ea; padding: 16px; border-radius: 8px">
-      <p>{{ done }}</p>
+    <div v-if="done" role="status" style="background: #e6f2ea; padding: 16px; border-radius: 10px">
+      <p style="margin-top: 0">{{ done }}</p>
       <NuxtLink to="/auth/driver-login">Go to driver login</NuxtLink>
     </div>
 
     <template v-else>
-      <p v-if="banner" role="alert" style="background: #f8e6e6; color: #8a1c1c; padding: 12px; border-radius: 8px">{{ banner }}</p>
+      <p v-if="banner" role="alert" style="background: #fbeaea; color: #9b1c1c; padding: 12px; border-radius: 10px">{{ banner }}</p>
 
-      <form novalidate @submit.prevent="submit">
-        <div v-for="f in fields" :key="f.key" style="margin-bottom: 16px">
-          <label :for="f.key">{{ f.label }}</label>
+      <form novalidate class="form-grid" @submit.prevent="submit">
+        <div v-for="f in fields" :key="f.key">
+          <label :for="f.key">{{ f.label }} <span aria-hidden="true" style="color: #9b1c1c">*</span></label>
           <input :id="f.key" v-model="form[f.key]" :type="f.type" :autocomplete="f.auto"
-                 :aria-invalid="!!errors[f.key]" style="display: block; width: 100%; min-height: 44px" />
-          <small v-if="f.key === 'plateNumber' && !errors.plateNumber" style="color: #4b5563">
+                 :aria-invalid="!!errors[f.key]" style="width: 100%" />
+          <small v-if="f.key === 'plateNumber' && !errors.plateNumber" style="color: #5b6b61">
             Use the plate or franchise number shown on your vehicle.
           </small>
-          <small v-if="errors[f.key]" style="color: #8a1c1c">{{ errors[f.key] }}</small>
+          <small v-if="errors[f.key]" style="color: #9b1c1c">{{ errors[f.key] }}</small>
         </div>
 
-        <label for="vehicleType">Vehicle type</label>
-        <select id="vehicleType" v-model="form.vehicleType" :aria-invalid="!!errors.vehicleType" style="display: block; width: 100%; min-height: 44px">
-          <option value="">Choose vehicle type</option>
-          <option value="Tricycle">Tricycle</option>
-          <option value="Bao-bao">Bao-bao</option>
-        </select>
-        <small v-if="errors.vehicleType" style="color: #8a1c1c">{{ errors.vehicleType }}</small>
+        <div>
+          <label for="vehicleType">Vehicle type <span aria-hidden="true" style="color: #9b1c1c">*</span></label>
+          <select id="vehicleType" v-model="form.vehicleType" :aria-invalid="!!errors.vehicleType" style="width: 100%">
+            <option value="">Choose vehicle type</option>
+            <option value="Tricycle">Tricycle</option>
+            <option value="Bao-bao">Bao-bao</option>
+          </select>
+          <small v-if="errors.vehicleType" style="color: #9b1c1c">{{ errors.vehicleType }}</small>
+        </div>
 
-        <button type="submit" :disabled="loading"
-                style="margin-top: 24px; width: 100%; min-height: 44px; background: #1b6b3a; color: #fff; border: 0; border-radius: 8px">
+        <button type="submit" class="btn-primary full" :disabled="loading">
           {{ loading ? 'Sending...' : 'Register' }}
         </button>
       </form>

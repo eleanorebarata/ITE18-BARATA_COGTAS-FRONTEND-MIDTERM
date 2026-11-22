@@ -45,6 +45,8 @@ export interface Place {
   lat: number
   lng: number
   active?: boolean
+  description?: string
+  address?: string
 }
 
 export interface FareOption {

@@ -55,40 +55,32 @@ const state = (c: AdminCancellation) => (c.strikeCounted ? 'Warning counted' : c
 </script>
 
 <template>
-  <main style="max-width: 1000px; margin: 0 auto; padding: 16px">
-    <AdminNav />
+  <main class="page">
+    <p class="eyebrow">Policy review</p>
     <h1>Cancellation review</h1>
-    <p>These are rides cancelled after a driver accepted. Remove a warning when the reason was valid.</p>
+    <p class="lead">These are rides cancelled after a driver accepted. Remove a warning when the reason was valid.</p>
 
-    <p v-if="banner" role="status" style="background: #e6f2ea; padding: 12px; border-radius: 8px">{{ banner }}</p>
+    <p v-if="banner" role="status" style="background: #e6f2ea; padding: 12px">{{ banner }}</p>
     <p v-if="loading">Loading...</p>
-    <p v-else-if="loadError" role="alert" style="color: #8a1c1c">{{ loadError }}</p>
-    <p v-else-if="!items.length">No cancellations to review.</p>
+    <p v-else-if="loadError" role="alert" style="color: #9b1c1c">{{ loadError }}</p>
+    <p v-else-if="!items.length" class="empty">No cancellations to review.</p>
 
-    <div v-else style="overflow-x: auto">
-      <table style="width: 100%; border-collapse: collapse; min-width: 720px">
-        <thead>
-          <tr style="text-align: left; border-bottom: 2px solid #d1d5db">
-            <th scope="col" style="padding: 8px">Passenger</th>
-            <th scope="col" style="padding: 8px">Ride</th>
-            <th scope="col" style="padding: 8px">Reason</th>
-            <th scope="col" style="padding: 8px">Warning</th>
-            <th scope="col" style="padding: 8px">Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="c in items" :key="c.id" style="border-bottom: 1px solid #e5e7eb">
-            <td style="padding: 8px">{{ c.passengerName }}</td>
-            <td style="padding: 8px">{{ c.route }}<br /><small>{{ when(c.pickupAt) }}</small></td>
-            <td style="padding: 8px">{{ c.reason }}<br /><small v-if="c.note">{{ c.note }}</small></td>
-            <td style="padding: 8px"><strong>{{ state(c) }}</strong></td>
-            <td style="padding: 8px">
-              <button v-if="c.strikeCounted" style="min-height: 44px" @click="openDialog(c)">Remove warning</button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    <article v-for="c in items" v-else :key="c.id" class="card">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px">
+        <strong>{{ c.passengerName }}</strong>
+        <span class="tag" :class="{ 'st-deactivated': c.strikeCounted }">{{ state(c) }}</span>
+      </div>
+      <h2 style="font-size: 1rem; margin: 6px 0 2px">{{ c.route }}</h2>
+      <p class="meta">{{ when(c.pickupAt) }}</p>
+      <div class="box">
+        <span class="k">Reason</span>
+        <span class="v">{{ c.reason }}</span>
+        <small v-if="c.note" style="color: #5b6b61">{{ c.note }}</small>
+      </div>
+      <div v-if="c.strikeCounted" class="card-actions">
+        <button type="button" @click="openDialog(c)">Remove warning</button>
+      </div>
+    </article>
 
     <ReasonDialog
       ref="dialog"
