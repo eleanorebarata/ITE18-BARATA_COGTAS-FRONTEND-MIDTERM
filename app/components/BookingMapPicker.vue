@@ -6,6 +6,7 @@ const props = defineProps<{ places: Place[]; pickupId: string | null; destinatio
 const emit = defineEmits<{ select: [id: string] }>()
 
 const el = ref<HTMLElement>()
+const unlocked = ref(false)
 let map: any
 let L: any
 let line: any
@@ -34,13 +35,27 @@ function redraw() {
   }
 }
 
+// A locked map ignores swipes and the mouse wheel, so the page scrolls normally.
+function applyLock() {
+  if (!map) return
+  const handlers = [map.dragging, map.touchZoom, map.scrollWheelZoom, map.doubleClickZoom, map.boxZoom, map.keyboard]
+  for (const h of handlers) {
+    if (unlocked.value) h?.enable()
+    else h?.disable()
+  }
+}
+watch(unlocked, applyLock)
+
 onMounted(async () => {
   const mod: any = await import('leaflet')
   // The page may have been closed while the map library was loading.
   if (gone || !el.value) return
   L = mod.default ?? mod
 
-  map = L.map(el.value)
+  map = L.map(el.value, {
+    dragging: false, touchZoom: false, scrollWheelZoom: false,
+    doubleClickZoom: false, boxZoom: false, keyboard: false, tap: false
+  })
   L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
     attribution: '&copy; OpenStreetMap contributors'
@@ -72,5 +87,13 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div ref="el" style="height: 320px; border-radius: 12px" role="application" aria-label="Campus map with pickup points" />
+  <div style="position: relative">
+    <div ref="el" style="height: 320px; border-radius: 12px" role="application" aria-label="Campus map with pickup points" />
+    <button type="button" :aria-pressed="unlocked"
+            style="position: absolute; top: 10px; right: 10px; z-index: 2; min-height: 36px; padding: 0 12px; background: #fff; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3)"
+            @click="unlocked = !unlocked">{{ unlocked ? 'Lock map' : 'Use map' }}</button>
+    <p class="meta" style="margin-top: 6px">
+      {{ unlocked ? 'Map is active. Press Lock map to scroll the page again.' : 'Press Use map to move and zoom. You can still tap the points.' }}
+    </p>
+  </div>
 </template>

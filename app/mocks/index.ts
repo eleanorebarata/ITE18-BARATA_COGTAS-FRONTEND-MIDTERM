@@ -13,6 +13,7 @@ import {
 import { getReviewForBooking, createReview, driverReviews, setReviewHidden } from './reviews'
 import { createReport, myReports, adminReports, adminUpdateReport } from './reports'
 import { setDriverLocation, stopDriverLocation, getBookingTracking, devMoveDriver } from './tracking'
+import { getProfile, updateProfile } from './profile'
 
 type Query = Record<string, string>
 type Ctx = { userId: string | null }
@@ -29,6 +30,9 @@ const routes: Route[] = [
   ['POST', /^\/auth\/admin-login$/, (_m, b) => doLogin(b, 'admin')],
   ['POST', /^\/auth\/driver-register$/, (_m, b) => registerDriver(b)],
   ['POST', /^\/auth\/user-register$/, (_m, b) => registerPassenger(b)],
+
+  ['GET', /^\/me\/profile$/, (_m, _b, _q, c) => getProfile(uid(c))],
+  ['PATCH', /^\/me\/profile$/, (_m, b, _q, c) => updateProfile(uid(c), b)],
 
   ['GET', /^\/places$/, () => activePlaces()],
   ['GET', /^\/fare-rules$/, () => fareRules()],

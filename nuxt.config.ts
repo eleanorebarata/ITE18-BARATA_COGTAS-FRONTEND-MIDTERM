@@ -1,4 +1,5 @@
 export default defineNuxtConfig({
+  routeRules: { '/': { redirect: '/auth/user-login' } },
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
   modules: ['@pinia/nuxt'],

@@ -7,8 +7,6 @@ const auth = useAuthStore()
 const service = useDriverService()
 const { data: profile } = await useAsyncData('driver-profile', () => service.profile(), { server: false })
 
-const initial = computed(() => (auth.user?.name ?? '?').charAt(0).toUpperCase())
-
 async function logout() {
   auth.logout()
   await navigateTo('/auth/driver-login')
@@ -17,18 +15,14 @@ async function logout() {
 
 <template>
   <main class="page">
-    <div class="card profile">
-      <div class="big-avatar" aria-hidden="true">{{ initial }}</div>
-      <span class="tag">{{ auth.status === 'suspended' ? 'Suspended' : 'Active' }}</span>
-      <h1 style="margin: 8px 0 0; font-size: 1.4rem">{{ auth.user?.name }}</h1>
-      <p class="meta" style="font-size: 0.85rem">Driver account</p>
+    <ProfileCard role-label="Driver account">
       <template v-if="profile">
         <p class="meta">{{ profile.vehicleType }} &middot; Plate <strong>{{ profile.plateNumber }}</strong></p>
         <span class="tag" :style="profile.plateVerified ? '' : 'background: #fdf3cc; color: #5c4400'">
           {{ profile.plateVerified ? 'Plate verified' : 'Plate waiting for verification' }}
         </span>
       </template>
-    </div>
+    </ProfileCard>
 
     <div class="card flush">
       <NuxtLink to="/reports" class="row">
