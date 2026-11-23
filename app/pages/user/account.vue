@@ -2,7 +2,6 @@
 definePageMeta({ middleware: ['auth', 'role'], role: 'passenger' })
 
 const auth = useAuthStore()
-const initial = computed(() => (auth.user?.name ?? '?').charAt(0).toUpperCase())
 
 async function logout() {
   auth.logout()
@@ -12,13 +11,7 @@ async function logout() {
 
 <template>
   <main class="page">
-    <div class="card profile">
-      <div class="big-avatar" aria-hidden="true">{{ initial }}</div>
-      <span class="tag">{{ auth.status === 'suspended' ? 'Suspended' : 'Active' }}</span>
-      <h1 style="margin: 8px 0 0; font-size: 1.4rem">{{ auth.user?.name }}</h1>
-      <p class="meta" style="font-size: 0.85rem">Passenger account</p>
-      <p class="meta">{{ auth.user?.email }}</p>
-    </div>
+    <ProfileCard role-label="Passenger account" />
 
     <div class="card flush">
       <NuxtLink to="/reports" class="row">
